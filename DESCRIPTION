@@ -9,9 +9,9 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: Infer from a llama model
-Imports: reticulate    
-License: MIT
+Description: Infer from a llama model. This package provides R bindings for llama.cpp.
+Imports: reticulate
+Depends: R (>= 3.5.0)
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.2
