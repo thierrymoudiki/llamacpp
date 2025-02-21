@@ -1,8 +1,16 @@
+# Global variable to pass R CMD check
+utils::globalVariables("llama")
+
 .onLoad <- function(libname, pkgname) {
-  # Ensure reticulate is using the correct Python environment
-  reticulate::py_install("llama-cpp-python")
-  # Import llama_cpp once on package load
-  llama <<- reticulate::import_from_path(module = "llama_cpp",
-                                         path = 'r-reticulate',
-                                         delay_load = TRUE)
+  # Import llama_cpp
+  assign("llama", reticulate::import("llama_cpp", delay_load = TRUE), 
+         envir = parent.env(environment()))
+}
+
+.onAttach <- function(libname, pkgname) {
+  # Check if llama-cpp-python is installed
+  if (!reticulate::py_module_available("llama_cpp")) {
+    packageStartupMessage("Note: The Python package 'llama-cpp-python' is required.\n",
+                         "Install it using: reticulate::py_install('llama-cpp-python')")
+  }
 }

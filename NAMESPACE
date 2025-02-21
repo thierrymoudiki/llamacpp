@@ -1,1 +1,6 @@
-exportPattern("^[[:alpha:]]+")
+# Export all functions that should be available to users
+export(download_llama_model)
+export(llama_infer)
+export(install_llama_deps)
+# Import required packages
+import(reticulate)
