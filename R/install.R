@@ -3,40 +3,58 @@
 #' @param python_version Python version to use (e.g., "3.9")
 #' @export
 install_llama_deps <- function(method = "virtualenv", python_version = "3.9") {
-  if (!reticulate::py_available(initialize = TRUE)) {
-    stop("Python is not available. Please install Python first.")
+  # Check for Python
+  python_cmd <- Sys.which("python3")
+  if (python_cmd == "") python_cmd <- Sys.which("python")
+  if (python_cmd == "") {
+    stop("Python not found. Please install Python first.")
   }
   
   tryCatch({
-    # Create and activate environment
     if (method == "conda") {
-      if (is.null(reticulate::conda_binary())) {
-        stop("Conda not available. Please install Miniconda or use method='virtualenv'")
-      }
-      reticulate::conda_install("r-reticulate", "pip")
-      reticulate::use_condaenv("r-reticulate", required = TRUE)
+      stop("Conda method not yet supported. Please use method='virtualenv'")
     } else {
       message("Setting up Python environment...")
-      reticulate::virtualenv_create("r-reticulate", python_version = python_version)
-      reticulate::use_virtualenv("r-reticulate", required = TRUE)
+      
+      # Create virtualenv directory
+      venv_dir <- "~/.virtualenvs/r-reticulate"
+      dir.create(dirname(venv_dir), showWarnings = FALSE, recursive = TRUE)
+      
+      # Create virtual environment
+      result <- system2("python3", c("-m", "venv", venv_dir))
+      if (result != 0) {
+        stop("Failed to create virtual environment")
+      }
+      
+      # Get the pip path
+      pip_path <- file.path(venv_dir, "bin", "pip")
+      if (.Platform$OS.type == "windows") {
+        pip_path <- file.path(venv_dir, "Scripts", "pip.exe")
+      }
+      
+      # Install/upgrade pip
+      message("Upgrading pip...")
+      system2(pip_path, c("install", "--upgrade", "pip"))
+      
+      # Install llama-cpp-python
+      message("Installing llama-cpp-python...")
+      result <- system2(pip_path, 
+                       c("install", "llama-cpp-python"),
+                       stdout = TRUE, 
+                       stderr = TRUE)
+      
+      # Set up reticulate to use this environment
+      Sys.setenv(RETICULATE_PYTHON = file.path(venv_dir, "bin", "python"))
+      reticulate::use_virtualenv(venv_dir, required = TRUE)
+      
+      # Verify installation
+      if (!reticulate::py_module_available("llama_cpp")) {
+        stop("Installation verification failed. Error: ", 
+             paste(result, collapse = "\n"))
+      }
+      
+      message("Installation successful!")
     }
-    
-    # Install the package using pip
-    message("Installing llama-cpp-python...")
-    result <- system2(
-      reticulate::py_config()$python,
-      c("-m", "pip", "install", "llama-cpp-python"),
-      stdout = TRUE,
-      stderr = TRUE
-    )
-    
-    # Check if installation was successful
-    if (!reticulate::py_module_available("llama_cpp")) {
-      stop("Installation failed. Error: ", paste(result, collapse = "\n"))
-    }
-    
-    message("Installation successful!")
-    
   }, error = function(e) {
     stop("Failed to install dependencies: ", e$message, "\n",
          "Try installing manually:\n",
