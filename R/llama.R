@@ -32,7 +32,7 @@ llama_infer <- function(prompt = "What's the capital of Spain?", model_path = NU
 
 
 #' Download a llama model
-#' @param model_url The URL to the model
+#' @param model_name The name of the model to download (default: "llama-2-7b-chat.Q4_K_M.gguf")
 #' @param dest_dir The directory to save the model
 #' @return The path to the model
 #' @export
@@ -42,13 +42,19 @@ llama_infer <- function(prompt = "What's the capital of Spain?", model_path = NU
 #' \dontrun{
 #' download_llama_model()
 #' }
-download_llama_model <- function(model_url = "https://your_model_host.com/llama-7b.gguf",
-                                 dest_dir = file.path(Sys.getenv("HOME"), "models")) {
+download_llama_model <- function(
+    model_name = "llama-2-7b-chat.Q4_K_M.gguf",
+    dest_dir = file.path(Sys.getenv("HOME"), "models")) {
+  
+  base_url <- "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main"
+  model_url <- file.path(base_url, model_name)
+  
   if (!dir.exists(dest_dir)) dir.create(dest_dir, recursive = TRUE)
-  dest_file <- file.path(dest_dir, basename(model_url))
+  dest_file <- file.path(dest_dir, model_name)
 
   if (!file.exists(dest_file)) {
-    message("Downloading model... This may take a while.")
+    message("Downloading model from ", model_url)
+    message("This may take a while...")
     download.file(model_url, destfile = dest_file, mode = "wb")
     message("Download complete: ", dest_file)
   } else {
