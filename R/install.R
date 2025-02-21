@@ -1,11 +1,11 @@
 #' Install required Python packages
 #' @param method Installation method ('virtualenv' or 'conda')
 #' @param python_version Python version to use (e.g., "3.9")
-#' @param envname Name of the virtual environment (default: "r-llama")
+#' @param envname Name of the virtual environment (default: "r-reticulate")
 #' @export
 install_llama_deps <- function(method = "virtualenv", 
                              python_version = "3.9",
-                             envname = "r-llama") {
+                             envname = "r-reticulate") {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop("Python is not available. Please install Python first.")
   }
@@ -74,9 +74,9 @@ install_llama_deps <- function(method = "virtualenv",
     stop("Failed to install dependencies: ", e$message, "\n",
          "Try installing manually:\n",
          "1. Create a Python virtual environment:\n",
-         "   python3 -m venv ~/.virtualenvs/r-llama\n",
+         "   python3 -m venv ~/.virtualenvs/r-reticulate\n",
          "2. Activate the environment:\n",
-         "   source ~/.virtualenvs/r-llama/bin/activate\n",
+         "   source ~/.virtualenvs/r-reticulate/bin/activate\n",
          "3. Install the package:\n",
          "   pip install llama-cpp-python")
   })
