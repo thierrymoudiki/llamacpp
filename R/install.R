@@ -1,27 +1,19 @@
 #' Install required Python packages
-#' @param method Installation method ('auto', 'virtualenv', or 'conda')
+#' @param method Installation method ('virtualenv' or 'conda')
 #' @param python_version Python version to use (e.g., "3.9")
 #' @export
-install_llama_deps <- function(method = "auto", python_version = "3.9") {
+install_llama_deps <- function(method = "virtualenv", python_version = "3.9") {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop("Python is not available. Please install Python first.")
   }
   
   # Try to create a new environment
   tryCatch({
-    if (method == "auto") {
-      # Try conda first, fall back to virtualenv
-      if (reticulate::conda_available()) {
-        method <- "conda"
-      } else {
-        method <- "virtualenv"
-      }
-    }
-    
     env_name <- "r-llama"
     
     if (method == "conda") {
-      if (!reticulate::conda_available()) {
+      # Check if conda is available
+      if (is.null(reticulate::conda_binary())) {
         stop("Conda not available. Please install Miniconda or use method='virtualenv'")
       }
       message("Creating conda environment...")
